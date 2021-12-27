@@ -44,6 +44,10 @@ studentRoute.post('/login',async(req,res)=>{
 
 })
 
+studentRoute.post('/involve-new-course',async(req,res)=>{
+    
+})
+
 
 studentRoute.get('/exam',(req,res)=>{
     sqlDB.query('select * from exams',(err,row)=>{

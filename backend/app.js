@@ -11,6 +11,7 @@ const sqlDB = require('./database')
 // const studentRouter = require('./routes/studentRouter');
 const studentRouter = require('./routes/studentsRoute')
 const institutionRouter = require('./routes/institutionsRouter')
+const generalRouter = require('./routes/generalRouter')
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(cors({
 // app.use('/students',studentRouter);
 app.use('/student',studentRouter);
 app.use('/institution',institutionRouter);
+app.use('/general',generalRouter);
 
 app.use('/public/images',express.static(path.join(__dirname, '/public/images')));
 
