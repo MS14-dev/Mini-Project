@@ -3,6 +3,7 @@ const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
 const {addNewStudent,getStudentByEmail} = require('../dbRoutes/students')
+const {addNewConduct,findConductByStudentId} = require('../dbRoutes/conducts')
 
 const Block = require('../Block')
 const BlockChain = require('../BlockChain')
@@ -45,9 +46,19 @@ studentRoute.post('/login',async(req,res)=>{
 })
 
 studentRoute.post('/involve-new-course',async(req,res)=>{
+    let {student,course} = req.body
+    let randomConductId = uuid();
+
+    let data = await addNewConduct(randomConductId,student,course);
+    if(data.length != 0){
+        res.send({response:true,message:'successfully involve',data})
+    }else{
+        res.send({response:false,message:'Failed to involve with the course'})
+    }
     
 })
 
+//just for test conducts and result linkage
 
 studentRoute.get('/exam',(req,res)=>{
     sqlDB.query('select * from exams',(err,row)=>{

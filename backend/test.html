@@ -8,18 +8,63 @@
 </head>
 <body>
 
-    <form method="post" action="http://localhost:8000/general/course" >
-        <h3>Find course</h3>
-        <input type="text" placeholder="course id" name="courseId" />
-        <button type="submit" >Submit</button>
+    <form method="post" action="http://localhost:8000/student/involve-new-course" >
+        <h3>Involve with new course</h3>
+        <input type="text" name="student" placeholder="student id" /><br/>
+        <input type="text" name="course" placeholder="course id" /><br/>
+        <button type="submit" >Involve</button>
     </form>
-    <form method="post" action="http://localhost:8000/general/institution" >
-        <h3>Find institution</h3>
-        <input type="text" placeholder="course id" name="institutionId" />
-        <button type="submit" >Submit</button>
-    </form>
+    <form method="post" action="http://localhost:8000/student/signin" >
+    <h3>Students Form</h3>
+   <input placeholder="name" name="name" type="text" /><br/>
+   <input placeholder="NIC" name="nic" type="number"/><br/>
+   <input placeholder="email" name="email" type="email"/><br/>
+   <input placeholder="password" name="password" type="password"/><br/>
+   <button type="submit" >Submit</button>
+</form>
+<form method="post" action="http://localhost:8000/student/login" >
+    <h3>Students Login</h3>
+    <input placeholder="email" name="email" type="email"/><br/>
+    <input placeholder="password" name="password" type="password"/><br/>
+    <button type="submit" >Submit</button>
+</form>
+<form method="post" action="http://localhost:8000/institution/signin">
+    <h3>Institution Registration</h3>
+    <input name="name" type="text" placeholder="institution name"/><br/>
+    <input name="userName" type="text" placeholder="userName"/><br/>
+    <input name="password" type="password" placeholder="password"/><br/>
+    <button type="submit" >Signin</button>
+</form>
+<form method="post" action="http://localhost:8000/institution/login" >
+    <h3>Institution Login</h3>
+    <input type="text" name="userName" placeholder="user name" /><br/>
+    <input type="password" name="password" placeholder="password"/><br/>
+    <button type="submit" >Login</button>
+</form>
 
+<form onsubmit="submitNewCourse()" >
+    <h3>Add new course</h3>
+    <input type="text" placeholder="Course name" name="name" id="courseName"/><br/>
+    <input type="text" placeholder="Course description" name="description" id="courseDescription"/><br/>
+    <input type="file" placeholder="Image" name="image" id="courseImage"/><br/>
+    <button type="submit" >Submit</button>
+</form>
+<form method="post" action="http://localhost:8000/student/involve-new-course" >
+    <input type="text" name="student" placeholder="student id" /><br/>
+    <input type="text" name="course" placeholder="course id" /><br/>
+    <button type="submit" >Involve</button>
+</form>
 
+<form method="post" action="http://localhost:8000/general/course" >
+    <h3>Find course</h3>
+    <input type="text" placeholder="course id" name="courseId" />
+    <button type="submit" >Submit</button>
+</form>
+<form method="post" action="http://localhost:8000/general/institution" >
+    <h3>Find institution</h3>
+    <input type="text" placeholder="course id" name="institutionId" />
+    <button type="submit" >Submit</button>
+</form>
 </body>
 
 <script>
@@ -40,39 +85,5 @@
     }
 </script>
 
-<!-- <form method="post" action="http://localhost:8000/institution/login" >
-    <h3>Institution Login</h3>
-    <input type="text" name="userName" placeholder="user name" /><br/>
-    <input type="password" name="password" placeholder="password"/><br/>
-    <button type="submit" >Login</button>
-</form>
 
-<form onsubmit="submitNewCourse()" >
-    <h3>Add new course</h3>
-    <input type="text" placeholder="Course name" name="name" id="courseName"/><br/>
-    <input type="text" placeholder="Course description" name="description" id="courseDescription"/><br/>
-    <input type="file" placeholder="Image" name="image" id="courseImage"/><br/>
-    <button type="submit" >Submit</button>
-</form> -->
 </html>
-<!-- <form method="post" action="http://localhost:8000/student/signin" >
-    <h3>Students Form</h3>
-   <input placeholder="name" name="name" type="text" /><br/>
-   <input placeholder="NIC" name="nic" type="number"/><br/>
-   <input placeholder="email" name="email" type="email"/><br/>
-   <input placeholder="password" name="password" type="password"/><br/>
-   <button type="submit" >Submit</button>
-</form>
-<form method="post" action="http://localhost:8000/student/login" >
-    <h3>Students Login</h3>
-    <input placeholder="email" name="email" type="email"/><br/>
-    <input placeholder="password" name="password" type="password"/><br/>
-    <button type="submit" >Submit</button>
-</form>
-<form method="post" action="http://localhost:8000/institution/signin">
-    <h3>Institution Registration</h3>
-    <input name="name" type="text" placeholder="institution name"/><br/>
-    <input name="userName" type="text" placeholder="userName"/><br/>
-    <input name="password" type="password" placeholder="password"/><br/>
-    <button type="submit" >Signin</button>
-</form> -->

@@ -45,7 +45,7 @@ institutionRouter.post('/add-new-course',async(req,res)=>{
     let randomCourseId = uuid();
 
     //this will be catch via session, in here a demostration only
-    let innstitutionId = "b39d1361-353e-4613-9c17-44d4425603dd";
+    let innstitutionId = "68a5c3e2-f225-45f1-947a-00ed5ce6d9ad";
 
     let newFilePath = __dirname+'/../public/images/courses/';
     let newFileName = `${randomCourseId}` + image.name;
