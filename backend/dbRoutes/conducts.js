@@ -37,7 +37,7 @@ const findConductByStudentId = async(id)=>{
         //         resolve(row)
         //     }
         // })
-        database.query(`SELECT courses.name,conducts.id 
+        database.query(`SELECT courses.name,conducts.id as conductId
                       FROM conducts,courses  where conducts.student = '${id}'`,
         (err,row)=>{
             if(err){

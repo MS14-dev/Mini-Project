@@ -28,19 +28,13 @@ SET time_zone = "+00:00";
 -- Table structure for table `exams`
 --
 
-CREATE TABLE `exams` (
-  `id` varchar(50) NOT NULL,
-  `course` varchar(50) NOT NULL,
-  `theory1` varchar(100) NOT NULL,
-  `exam1` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ;
 
 --
 -- Dumping data for table `exams`
 --
 
 INSERT INTO `exams` (`id`, `course`, `theory1`, `exam1`, `theory2`, `exam2`) VALUES
-('ed9f3214-772b-4ad8-81b1-41717b69daf3', 'test course one', 'Amazon.com, Inc. is an American multinational technology company which focuses on e-commerce, cloud ', '{\"question\": \"Who is the founder of amazon\",\r\n\"answers\":[\r\n{\"answer\": \"Bill Gates\", \"correct\": \"false\"},\r\n{\"answer\": \"Jeff Besos\", \"correct\": \"true\"},\r\n{\"answer\": \"Elorn Mulsk\", \"correct\": \"false\"},\r\n{\"answer\": \"Mark Zuckerburg\", \"correct\": \"false\"}]\r\n}', 'test theory two', '{\"question\": \"Who is the founder of amazon\",\r\n\"answers\":[\r\n{\"answer\": \"Bill Gates\", \"correct\": \"false\"},\r\n{\"answer\": \"Jeff Besos\", \"correct\": \"true\"},\r\n{\"answer\": \"Elorn Mulsk\", \"correct\": \"false\"},\r\n{\"answer\": \"Mark Zuckerburg\", \"correct\": \"false\"}]\r\n}');
+('ed9f3214-772b-4ad8-81b1-41717b69daf3', '37f82b34-8119-4f2b-8b4b-9335a1f13e18', 'Amazon.com, Inc. is an American multinational technology company which focuses on e-commerce, cloud ', '{\"question\": \"Who is the founder of amazon\",\r\n\"answers\":[\r\n{\"answer\": \"Bill Gates\", \"correct\": \"false\"},\r\n{\"answer\": \"Jeff Besos\", \"correct\": \"true\"},\r\n{\"answer\": \"Elorn Mulsk\", \"correct\": \"false\"},\r\n{\"answer\": \"Mark Zuckerburg\", \"correct\": \"false\"}]\r\n}', 'test theory two', '{\"question\": \"Who is the founder of amazon\",\r\n\"answers\":[\r\n{\"answer\": \"Bill Gates\", \"correct\": \"false\"},\r\n{\"answer\": \"Jeff Besos\", \"correct\": \"true\"},\r\n{\"answer\": \"Elorn Mulsk\", \"correct\": \"false\"},\r\n{\"answer\": \"Mark Zuckerburg\", \"correct\": \"false\"}]\r\n}');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

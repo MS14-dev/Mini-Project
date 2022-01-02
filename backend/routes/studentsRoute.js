@@ -4,6 +4,7 @@ const {SHA256} = require('crypto-js')
 
 const {addNewStudent,getStudentByEmail} = require('../dbRoutes/students')
 const {addNewConduct,findConductByStudentId} = require('../dbRoutes/conducts')
+const {findResultByConductId} = require('../dbRoutes/results')
 
 const Block = require('../Block')
 const BlockChain = require('../BlockChain')
@@ -45,6 +46,7 @@ studentRoute.post('/login',async(req,res)=>{
 
 })
 
+//involve a particular student to a particular course
 studentRoute.post('/involve-new-course',async(req,res)=>{
     let {student,course} = req.body
     let randomConductId = uuid();
@@ -58,7 +60,20 @@ studentRoute.post('/involve-new-course',async(req,res)=>{
     
 })
 
-//just for test conducts and result linkage
+//get all the conducts details of particular student;
+studentRoute.get('/conducts',async(req,res)=>{
+    //student id should be get from the session variable;
+    let studentId = '0f514580-3742-46ff-9085-b1a885044515';
+    let data = await findConductByStudentId(studentId);
+    res.send(data);
+})
+
+//get exam results of particular conduct(by a student);
+studentRoute.post('/conduct/result',async(req,res)=>{
+    let {conductId} = req.body
+    let data = await findResultByConductId(conductId);
+    res.send(data)
+})
 
 studentRoute.get('/exam',(req,res)=>{
     sqlDB.query('select * from exams',(err,row)=>{

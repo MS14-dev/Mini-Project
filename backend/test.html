@@ -65,6 +65,15 @@
     <input type="text" placeholder="course id" name="institutionId" />
     <button type="submit" >Submit</button>
 </form>
+<form method="get" action="http://localhost:8000/student/conducts">
+    <h3>Get all conducts for a specific student</h3>
+    <button type="submit" >Find</button>
+</form>
+<form method="post" action="http://localhost:8000/student/conduct/result">
+    <h3>Get result of particular conducts </h3>
+    <input name="conductId" value="6e3078d0-1e1d-44b3-bbc7-1cbe3a334e38" />
+    <button type="submit" >Find</button>
+</form>
 </body>
 
 <script>
