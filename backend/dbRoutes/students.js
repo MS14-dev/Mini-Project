@@ -27,7 +27,21 @@ const getStudentByEmail=(email)=>{
     })
 }
 
+//after login purposes
+const getStudentByStudentId=(id)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from students where id='${id}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewStudent,
-    getStudentByEmail
+    getStudentByEmail,
+    getStudentByStudentId
 }

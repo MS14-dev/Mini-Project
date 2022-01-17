@@ -1,6 +1,6 @@
 const database = require('../database');
 
-const getExamsByCourseId=async(courseId)=>{
+const findExamsByCourseId=async(courseId)=>{
 
     return new Promise((resolve,reject)=>{
         database.query(`select * from exams where course='${courseId}'`,(err,row)=>{
@@ -15,5 +15,5 @@ const getExamsByCourseId=async(courseId)=>{
 }
 
 module.exports = {
-    getExamsByCourseId,
+    findExamsByCourseId,
 }

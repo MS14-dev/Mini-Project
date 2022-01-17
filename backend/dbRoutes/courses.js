@@ -25,4 +25,21 @@ const findCourseById=(id)=>{
         })
     })
 }
-module.exports = {addNewCourse,findCourseById,findCourseById};
+
+const findAllCourses=()=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from courses`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+module.exports = {
+    addNewCourse,
+    findCourseById,
+    findCourseById,
+    findAllCourses};

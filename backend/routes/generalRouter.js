@@ -1,6 +1,9 @@
 const express = require('express')
-const {findCourseById} = require('../dbRoutes/courses')
+
+const {findCourseById,findAllCourses} = require('../dbRoutes/courses')
 const {findInstitutionById} = require('../dbRoutes/institutions')
+const {findExamsByCourseId} = require('../dbRoutes/exams');
+const { response } = require('express');
 
 const generalRouter = express.Router();
 
@@ -27,6 +30,22 @@ generalRouter.post('/institution', async (req,res)=>{
         res.send({response:false,message:'Cant find the institution',data})
     }
 
+})
+
+//find all the courses
+generalRouter.get('/courses',async(req,res)=>{
+    let data = await findAllCourses();
+    if(data.length == 0){
+        res.send({response:false,message:"No courses"})
+    }else{
+        res.send({response:true,message:'Successful',courses:data})
+    }
+})
+
+//just for access a particular exam
+generalRouter.get('/exam',async(req,res)=>{
+    let data = await findExamsByCourseId('37f82b34-8119-4f2b-8b4b-9335a1f13e18')
+    res.send(data)
 })
 
 

@@ -2,48 +2,92 @@ const express = require('express')
 const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
-const {addNewStudent,getStudentByEmail} = require('../dbRoutes/students')
-const {addNewConduct,findConductByStudentId} = require('../dbRoutes/conducts')
+const {addNewStudent,getStudentByEmail,getStudentByStudentId} = require('../dbRoutes/students')
+const {addNewConduct,findConductByStudentId,findConductById} = require('../dbRoutes/conducts')
 const {findResultByConductId} = require('../dbRoutes/results')
+const {findExamsByCourseId} = require('../dbRoutes/exams')
 
 const Block = require('../Block')
 const BlockChain = require('../BlockChain')
+const { findCourseById } = require('../dbRoutes/courses')
 
 
 const studentRoute = express.Router();
 
 //signin of students
 studentRoute.post('/signin',async(req,res)=>{
+
+    if(!req.session.isLogged){
     let{name,nic,email,password} = req.body
     let randomStudentId = uuid();
-
+    console.log(req.body)
     let hashedEmail = SHA256(email).toString();console.log(hashedEmail);
     let hashedPassword = SHA256(password).toString();
     let hashedNIC = SHA256(nic).toString();
     
     let row = await addNewStudent(name,hashedNIC,hashedEmail,hashedPassword,randomStudentId);
-    console.log(row[0].name)
-    res.send({randomStudentId})
+    // console.log(row[0].name)
+    req.session.isLogged = true;
+    req.session.studentId = row[0].id
+    res.send({response:true,message:'Successfully Signin',data:row[0]})
+    }else{
+        res.send({response:false,message:'Already Logged',data:null})
+    }
 })
 
 //login of students
 studentRoute.post('/login',async(req,res)=>{
+    if(!req.session.isLogged){
     let {email,password} = req.body;
-
+    console.log(req.body)
+ 
     let hashedEmail = SHA256(email).toString(); console.log(hashedEmail);
     let hashedPassword = SHA256(password).toString();
 
     let data = await getStudentByEmail(hashedEmail);
     if(data.length == 0){
-        res.send("Invalid Email")
+        res.send({response:false,message:"Invalid Email",data:null})
     }else{
         if(data[0].password == hashedPassword){
-            res.send(data[0])
+            req.session.isLogged = true;
+            req.session.studentId = data[0].id
+            res.send({response:true,message:'success',data:data[0]})
         }else{
-            res.send("Invalid Password")
+            res.send({response:false,message:"Invalid Password",data:null})
         }
+    }}
+    else{
+        console.log(req.session)
+        res.send({response:false,message:'Already Logged',data:null})
     }
 
+})
+
+studentRoute.get('/logout',(req,res)=>{
+    console.log(req.session)
+    if(req.session.isLogged){
+        // req.session.isLog = false;
+        // req.session.studentId = '';
+        req.session.destroy();
+        res.send({response:true,message:'Successfully Logged out',data:null})
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+})
+
+//get particular student details by his/her student id.(For after login purposes) 
+studentRoute.get('/by-id/:id',async(req,res)=>{
+    if(req.session.isLogged){
+        let id = req.params.id
+        let data = await getStudentByStudentId(id)
+        if(data.length != 0){
+            res.send({response:true,message:'success',data:data[0]})
+        }else{
+            res.send({response:false,message:'Logged but unsuccessfull',data:null})
+        }
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
 })
 
 //involve a particular student to a particular course
@@ -62,28 +106,68 @@ studentRoute.post('/involve-new-course',async(req,res)=>{
 
 //get all the conducts details of particular student;
 studentRoute.get('/conducts',async(req,res)=>{
-    //student id should be get from the session variable;
-    let studentId = '0f514580-3742-46ff-9085-b1a885044515';
-    let data = await findConductByStudentId(studentId);
-    res.send(data);
+    if(req.session.isLogged){
+        let id = req.session.studentId
+        let data = await findConductByStudentId(id);
+        res.send({response:true,message:'All involved courses',data:data})
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+})
+
+//get particluar conduct details of a student by it's ID
+studentRoute.get('/conduct/:conductId',async (req,res)=>{
+    if(req.session.isLogged){
+        let data = await findConductById(req.params.conductId)
+        res.send({response:true,message:'Success',data:data[0]});
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
 })
 
 //get exam results of particular conduct(by a student);
-studentRoute.post('/conduct/result',async(req,res)=>{
-    let {conductId} = req.body
+studentRoute.get('/conduct/result/:conductId',async(req,res)=>{
+    let conductId = req.params.conductId;
+    console.log('conduct/result called')
     let data = await findResultByConductId(conductId);
-    res.send(data)
+    if(data.length != 0){
+        res.send({response:true,message:'Successfull',data:data[0]})
+    }else{
+        res.send({response:false,message:"Error",data:null})
+    }
 })
 
-studentRoute.get('/exam',(req,res)=>{
-    sqlDB.query('select * from exams',(err,row)=>{
-        if(err){
-            res.send('Query Failed')
-        }else{
-            res.send(row)
-        }
-    })
+//get exams for particular conduct by student (by conduct ID)(remaining exams and theories)
+//theory one and exam one
+studentRoute.get(`/exam-by-conduct/:conductId`,async(req,res)=>{
+
+    if(req.session.isLogged){
+    let conductId = req.params.conductId;
+    let conductDetails = await findConductById(conductId);
+
+    if(conductDetails.length > 0){
+        let courseId = conductDetails[0].course;
+        let examDetails = await findExamsByCourseId(courseId);
+        res.send({response:true,message:'success',data:examDetails[0]})
+    }else{
+        res.send({response:false,message:'error',data:null});
+    }
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+
 })
+
+
+// studentRoute.get('/exam',(req,res)=>{
+//     sqlDB.query('select * from exams',(err,row)=>{
+//         if(err){
+//             res.send('Query Failed')
+//         }else{
+//             res.send(row)
+//         }
+//     })
+// })
 
 //the blockchain part
 const blockChain = new BlockChain();

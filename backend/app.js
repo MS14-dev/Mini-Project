@@ -24,13 +24,13 @@ secret:'justastringforhere',
 resave:false,
 saveUninitialized:true,
 cookie:{
-    maxAge:60*60*24
+    maxAge:60*60*24*1000
 }
 }))
 
 app.use(cors({
-    // origin:'http://localhost:3000',
-    // methods:['get','post'],
+    origin:'http://localhost:3000',
+    methods:['get','post'],
     credentials:true,
 }));
 

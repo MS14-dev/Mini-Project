@@ -10,31 +10,65 @@ const institutionRouter = express.Router();
 institutionRouter.use(fileUpload());
 
 institutionRouter.post('/signin',async(req,res)=>{
+    if(!req.session.isLogged){
     let {name,userName,password} = req.body;
+    let image = req.files.image;
+    console.log(image)
     let randomInsId = uuid();
+
+    let newImagePath = __dirname+'/../public/images/institutions/';
+    let newImageName = randomInsId+image.name;
 
     let hashedUserName = SHA256(userName).toString();
     let hashedPassword = SHA256(password).toString();
 
-    let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword);
-    res.send(data);
+    image.mv(`${newImagePath}${newImageName}`,async(err)=>{
+
+        if(err){
+            res.send({response:false,message:'Failed to register',data:null})
+        }else{
+            let imagePath = `http://localhost:8000/public/images/institutions/${newImageName}`
+            let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword,imagePath);
+            req.session.isLogged = true;
+            req.session.institutionId = data[0].id;
+            res.send({response:true,message:'Successfully Registered',data:data[0]});
+        }
+    })
+    }else{
+        res.send({response:false,message:'Already Logged',data:null})
+    }
 })
 
 institutionRouter.post('/login',async(req,res)=>{
-    let {userName,password} = req.body
-    let hashedUserName = SHA256(userName).toString()
-    let hashedPassword = SHA256(password).toString();
-    console.log(req.session)
-    let rows = await findInstitutionByUserName(hashedUserName);
-    if(rows.length == 0){
-        res.send({response:false,message:'Invalid user name'})
-    }else{
-        if(rows[0].password != hashedPassword ){
-            res.send({response:false,message:'Invalid Password'})
+
+    if(!req.session.isLogged){
+        let {userName,password} = req.body
+        let hashedUserName = SHA256(userName).toString()
+        let hashedPassword = SHA256(password).toString();
+        console.log(req.session)
+        let rows = await findInstitutionByUserName(hashedUserName);
+        if(rows.length == 0){
+            res.send({response:false,message:'Invalid user name',data:null})
         }else{
-            req.session.logged = true;
-            res.send({response:true,message:rows[0]})
+            if(rows[0].password != hashedPassword ){
+                res.send({response:false,message:'Invalid Password',data:null})
+            }else{
+                req.session.isLogged = true;
+                req.session.institutionId = rows[0].id
+                res.send({response:true,message:'Successfully Logged',data:rows[0]})
+            }
         }
+    }else{
+        res.send({response:false,message:'Already Logged',data:null})
+    }
+})
+
+institutionRouter.get('/logout',(req,res)=>{
+    if(req.session.isLogged){
+        req.session.destroy();
+        res.send({response:true,message:'Successfully logout',data:null})
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
     }
 })
 

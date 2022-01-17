@@ -13,10 +13,10 @@ const findInstitutionByUserName=(hashedUserName)=>{
     })
 }
 
-const addNewInstitution =(id,name,userName,password)=>{
+const addNewInstitution =(id,name,userName,password,image)=>{
     return new Promise((resolve,reject)=>{
-        database.query(`insert into institutions (id,name,userName,password) values('${id}','${name}',
-        '${userName}','${password}')`,(err,row)=>{
+        database.query(`insert into institutions (id,name,userName,password,image) values('${id}','${name}',
+        '${userName}','${password}','${image}')`,(err,row)=>{
             if(err){
                 reject(err)
             }else{
