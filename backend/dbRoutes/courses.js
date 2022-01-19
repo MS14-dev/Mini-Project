@@ -16,7 +16,11 @@ const addNewCourse=(id,name,institution,description,image)=>{
 const findCourseById=(id)=>{
     return new Promise((reseolve,reject)=>{
 
-        database.query(`select * from courses where id='${id}'`,(err,row)=>{
+        database.query(`select courses.name,courses.image,courses.description,institutions.id AS institutionId, 
+        institutions.name as institution, courses.id
+        from courses,institutions 
+        where courses.institution = institutions.id 
+        AND courses.id='${id}'`,(err,row)=>{
             if(err){
                 reject(err)
             }else{

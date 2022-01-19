@@ -3,7 +3,7 @@ const {v4:uuid} = require('uuid')
 const {SHA256} = require('crypto-js')
 const fileUpload = require('express-fileupload')
 
-const {addNewInstitution,findInstitutionByUserName} = require('../dbRoutes/institutions');
+const {addNewInstitution,findInstitutionByUserName,findInstitutionById} = require('../dbRoutes/institutions');
 const {addNewCourse} = require('../dbRoutes/courses')
 
 const institutionRouter = express.Router();
@@ -70,6 +70,12 @@ institutionRouter.get('/logout',(req,res)=>{
     }else{
         res.send({response:false,message:'Need to login first',data:null})
     }
+})
+
+//for after login purposes
+institutionRouter.get('/by-id',async(req,res)=>{
+    let institutionId = req.session.institutionId;
+    let data = await findInstitutionById(institutionId);
 })
 
 institutionRouter.post('/add-new-course',async(req,res)=>{

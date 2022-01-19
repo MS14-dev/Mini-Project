@@ -13,9 +13,9 @@ generalRouter.post('/course',async (req,res)=>{
     let data = await findCourseById(courseId)
     console.log(courseId)
     if(data.length != 0){
-        res.send({response:true,message:'successfull',data})
+        res.send({response:true,message:'successfull',data:data[0]})
     }else{
-        res.send({response:false,message:'No matching course'})
+        res.send({response:false,message:'No matching course',data:null})
     }
 })
 

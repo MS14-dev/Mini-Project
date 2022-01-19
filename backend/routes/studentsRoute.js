@@ -3,9 +3,9 @@ const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
 const {addNewStudent,getStudentByEmail,getStudentByStudentId} = require('../dbRoutes/students')
-const {addNewConduct,findConductByStudentId,findConductById} = require('../dbRoutes/conducts')
-const {findResultByConductId} = require('../dbRoutes/results')
-const {findExamsByCourseId} = require('../dbRoutes/exams')
+const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse} = require('../dbRoutes/conducts')
+const {findResultByConductId,addNewResult} = require('../dbRoutes/results')
+const {findExamsByCourseId,updateResultByConductId} = require('../dbRoutes/exams')
 
 const Block = require('../Block')
 const BlockChain = require('../BlockChain')
@@ -76,11 +76,16 @@ studentRoute.get('/logout',(req,res)=>{
 })
 
 //get particular student details by his/her student id.(For after login purposes) 
-studentRoute.get('/by-id/:id',async(req,res)=>{
+//original
+// studentRoute.get('/by-id/:id',async(req,res)=>{
+studentRoute.get('/by-id',async(req,res)=>{
     if(req.session.isLogged){
-        let id = req.params.id
+        //original
+        // let id = req.params.id
+        let id = req.session.studentId
         let data = await getStudentByStudentId(id)
         if(data.length != 0){
+            console.log(data)
             res.send({response:true,message:'success',data:data[0]})
         }else{
             res.send({response:false,message:'Logged but unsuccessfull',data:null})
@@ -92,14 +97,34 @@ studentRoute.get('/by-id/:id',async(req,res)=>{
 
 //involve a particular student to a particular course
 studentRoute.post('/involve-new-course',async(req,res)=>{
-    let {student,course} = req.body
-    let randomConductId = uuid();
+    
+    let {course} = req.body
+    let student = req.session.studentId;
 
-    let data = await addNewConduct(randomConductId,student,course);
-    if(data.length != 0){
-        res.send({response:true,message:'successfully involve',data})
-    }else{
-        res.send({response:false,message:'Failed to involve with the course'})
+    if(req.session.isLogged){
+
+        let involveData = await findInvolvementOfStudentToCourse(student,course)
+      if(involveData.length == 0){
+        let randomConductId = uuid();
+
+        let data = await addNewConduct(randomConductId,student,course);
+        if(data.length != 0){
+            //original
+            // res.send({response:true,message:'successfully involve',data})
+            let randomResultId = uuid();
+            let resultResponse = await addNewResult(randomResultId,randomConductId);
+            if(resultResponse){
+                 res.send({response:true,message:'successfully involve',data})
+            }
+        }else{
+            res.send({response:false,message:'Failed to involve with the course'})
+        }
+      }else{
+          res.send({response:false,message:'You have already involved',data:null})
+      }
+    }
+    else{
+        res.send({response:false,message:'Need to login first'})
     }
     
 })
@@ -158,7 +183,27 @@ studentRoute.get(`/exam-by-conduct/:conductId`,async(req,res)=>{
 
 })
 
-
+//update exam 1 results when particular student achieve it.
+studentRoute.post('/result-update-exam1',async(req,res)=>{
+    let {conductId,exam} = req.body
+    if(req.session.isLogged){
+        let data = await updateResultByConductId(conductId,exam)
+        console.log(data)
+        res.send('K');
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+})
+studentRoute.post('/result-update-exam2',async(req,res)=>{
+    let {conductId,exam} = req.body
+    if(req.session.isLogged){
+        let data = await updateResultByConductId(conductId,exam)
+        console.log(data)
+        res.send('K');
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+})
 // studentRoute.get('/exam',(req,res)=>{
 //     sqlDB.query('select * from exams',(err,row)=>{
 //         if(err){
