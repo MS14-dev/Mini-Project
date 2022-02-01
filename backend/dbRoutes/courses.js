@@ -3,7 +3,7 @@ const database = require('../database');
 const addNewCourse=(id,name,institution,description,image)=>{
     return new Promise((resolve,reject)=>{
         database.query(`insert into courses (id,name,institution,description,image) values
-        ('${id}','${name}','${institution}','${description}','${image}')`,(err,row)=>{
+        ('${id}',?,'${institution}',?,'${image}')`,[name,description],(err,row)=>{
             if(err){
                 reject(err)
             }else{
@@ -42,8 +42,36 @@ const findAllCourses=()=>{
     })
 }
 
+//find course by user input
+const findCourseByUserInput=(userInput)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from courses where name like '%${userInput}%'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+const findCourseByIdForCertificate=(id)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from courses where id='${id}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewCourse,
     findCourseById,
     findCourseById,
-    findAllCourses};
+    findAllCourses,
+    findCourseByUserInput,
+    findCourseByIdForCertificate
+};

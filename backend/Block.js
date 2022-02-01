@@ -8,6 +8,7 @@ class Block {
         this.preHash = preHash;
         this.hash = this.calculateHash()
     }
+ 
     calculateHash=()=>{
         return SHA256(this.index+this.preHash+this.date+JSON.stringify(this.data).toString()).toString();
     }

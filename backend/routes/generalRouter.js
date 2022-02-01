@@ -1,6 +1,6 @@
 const express = require('express')
 
-const {findCourseById,findAllCourses} = require('../dbRoutes/courses')
+const {findCourseById,findAllCourses,findCourseByUserInput} = require('../dbRoutes/courses')
 const {findInstitutionById} = require('../dbRoutes/institutions')
 const {findExamsByCourseId} = require('../dbRoutes/exams');
 const { response } = require('express');
@@ -16,6 +16,18 @@ generalRouter.post('/course',async (req,res)=>{
         res.send({response:true,message:'successfull',data:data[0]})
     }else{
         res.send({response:false,message:'No matching course',data:null})
+    }
+})
+
+//find courses by user inputs
+generalRouter.post('/courses-by-input',async (req,res)=>{
+    let {userInput} = req.body;
+    let data = await findCourseByUserInput(userInput)
+
+    if(data.length != 0){
+        res.send({response:true,message:'successfull',data:data})
+    }else{
+        res.send({response:false,message:'No matching courses for your input',data:null})
     }
 })
 

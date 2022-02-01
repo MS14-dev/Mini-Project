@@ -4,14 +4,25 @@ const cors = require('cors')
 const session = require('express-session')
 const {Server} = require('socket.io')
 const http = require('http')
+const mongoose = require('mongoose');
 
 const sqlDB = require('./database')
+const url='mongodb://localhost:27017/confusion';
+
+const connect = mongoose.connect(url);
+
+connect.then(function(db){
+  console.log('Connected correctly to the Mongo server');
+},function(err){
+  console.log(err);
+})
 
 
 // const studentRouter = require('./routes/studentRouter');
 const studentRouter = require('./routes/studentsRoute')
 const institutionRouter = require('./routes/institutionsRouter')
 const generalRouter = require('./routes/generalRouter')
+const req = require('express/lib/request')
 
 const app = express();
 

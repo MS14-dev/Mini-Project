@@ -14,7 +14,7 @@ const findExamsByCourseId=async(courseId)=>{
 
 }
 
-const addNewExam =(id,course,t1,t2,exam1,exam2)=>{
+const addNewExam = (id,course,t1,t2,exam1,exam2)=>{
     return new Promise((resolve,reject)=>{
         
         // let {wrong11,wrong12,wrong13,correct1} = ans1
@@ -23,7 +23,7 @@ const addNewExam =(id,course,t1,t2,exam1,exam2)=>{
         exam2Json = JSON.stringify(exam2)
 
         database.query(`insert into exams (id,course,theory1,theory2,exam1,exam2) 
-        values('${id}','${course}','${t1}','${t2}', ?,?)`,[exam1Json,exam2Json],(err,row)=>{
+        values('${id}','${course}',?,?, ?,?)`,[t1,t2,exam1Json,exam2Json],(err,row)=>{
             if(err){
                 reject(err)
             }else{

@@ -3,10 +3,20 @@ const {v4:uuid} = require('uuid')
 const {SHA256} = require('crypto-js')
 const fileUpload = require('express-fileupload')
 
-const {addNewInstitution,findInstitutionByUserName,findInstitutionById} = require('../dbRoutes/institutions');
-const {addNewCourse} = require('../dbRoutes/courses')
+const {addNewInstitution,findInstitutionByUserName,findInstitutionById,findValidityOfName,findValidityOfUserName} = require('../dbRoutes/institutions');
+const {addNewCourse,findCourseById,findCourseByIdForCertificate} = require('../dbRoutes/courses')
 const {addNewExam} = require('../dbRoutes/exams');
 const { response } = require('express');
+const  {findAllConductsByInstitution,findConductById,updateCertificateId} = require('../dbRoutes/conducts')
+const {getStudentByStudentId} = require('../dbRoutes/students')
+
+
+//Block class
+const Block = require('../Block')
+//Blockchain Class
+const BlockChain = require('../BlockChain')
+//block mongodb model
+const block = require('../models/Block')
 
 const institutionRouter = express.Router();
 institutionRouter.use(fileUpload());
@@ -24,18 +34,30 @@ institutionRouter.post('/signin',async(req,res)=>{
     let hashedUserName = SHA256(userName).toString();
     let hashedPassword = SHA256(password).toString();
 
-    image.mv(`${newImagePath}${newImageName}`,async(err)=>{
+    let nameValidation = await findValidityOfName(name);
+    let userNameValidation = await findValidityOfUserName(hashedUserName);
 
-        if(err){
-            res.send({response:false,message:'Failed to register',data:null})
+    if(nameValidation.length == 0){
+        if(userNameValidation.length == 0){
+                image.mv(`${newImagePath}${newImageName}`,async(err)=>{
+
+                    if(err){
+                        res.send({response:false,message:'Failed to register',data:null})
+                    }else{
+                        let imagePath = `http://localhost:8000/public/images/institutions/${newImageName}`
+                        let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword,imagePath);
+                        req.session.isLogged = true;
+                        req.session.institutionId = data[0].id;
+                        res.send({response:true,message:'Successfully Registered',data:data[0]});
+                    }
+                })
         }else{
-            let imagePath = `http://localhost:8000/public/images/institutions/${newImageName}`
-            let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword,imagePath);
-            req.session.isLogged = true;
-            req.session.institutionId = data[0].id;
-            res.send({response:true,message:'Successfully Registered',data:data[0]});
+            res.send({response:false,message:`${userName} is already taken please try different one`,data:null})
         }
-    })
+    }else{
+        res.send({response:false,message:"Institution is already registered",data:null})
+    }
+    
     }else{
         res.send({response:false,message:'Already Logged',data:null})
     }
@@ -143,6 +165,94 @@ institutionRouter.post('/add-new-course',async(req,res)=>{
     }else{
         res.send({response:false,message:'Need login first',data:null})
     }
+})
+
+//view the student progress
+institutionRouter.get('/conducts',async(req,res)=>{
+    if(req.session.isLogged){
+        let instId = req.session.institutionId
+        let data = await findAllConductsByInstitution(instId);
+        if(data.length != 0){
+            res.send({response:true,message:'Suucess',data:data})
+        }else{
+            res.send({response:false,message:"No involvements",data:null})
+        }
+    }else{
+        res.send({response:false,message:'Need to login first',data:null})
+    }
+})
+
+//the blockchain part
+const blockChain = new BlockChain();
+blockChain.createMashBlock();
+//release certificate for particular student
+institutionRouter.post('/release-certificate',async(req,res)=>{
+
+    let {conductId} = req.body;
+    let conductData = await findConductById(conductId);
+    let courseData = await findCourseByIdForCertificate(conductData[0].course)
+    let institutionData = await findInstitutionById(courseData[0].institution)
+    let studentData = await getStudentByStudentId(conductData[0].student)
+    console.log("InstitutionData:==",institutionData)
+    console.log("courseData:==",courseData)
+if(req.session.isLogged){
+    if(conductData[0].certificateId == '0' && conductData[0].complete == 1){
+                        let certificateData = uuid()//generate certifcate ID
+                        let date = new Date()
+                        let newBlock = new Block( 
+                        (blockChain.getLatestBlock().index + 1), 
+                        date.toUTCString(), 
+                        {
+                            certificateId: certificateData,
+                            studentData:{
+                                id:studentData[0].id,
+                                name:studentData[0].name,
+                                email:studentData[0].email,
+                                nic:studentData[0].nic
+                            },
+                            institutionData:{
+                                id: institutionData[0].id,
+                                name:institutionData[0].name
+                            },
+                            courseData:{
+                                id:courseData[0].id,
+                                name:courseData[0].name
+                            }
+                        },
+                        blockChain.getLatestBlock().hash);
+
+                        //check the chain before add the block
+                        if(blockChain.isChainValid()){
+                            console.log("PRE-HASH: ",newBlock.preHash)
+                            //add the new block to the mongodb
+                            block.create({index:newBlock.index,
+                                date:newBlock.date,
+                                data:newBlock.data,
+                                hash:newBlock.hash,
+                                preHash:newBlock.preHash})
+    
+                            //add the new block to the chain
+                            blockChain.addBlock(newBlock)
+                            //check the chain after add to the block
+                            if(blockChain.isChainValid()){
+                                let data = await updateCertificateId(conductId,certificateData)
+                                if(data.affectedRows){
+                                res.send({response:true,message:'Success'})
+                                }else{
+                                    res.send({response:false,message:'Some server error'})
+                                }
+                            }
+                            // console.log(blockChain)
+                        }
+    }
+    else{
+        res.send({response:false,message:'Already issued or not completed',data:null})
+    }
+}
+else{
+    res.send({response:false,message:"Please Login First",data:null});
+}
+
 })
 
 module.exports = institutionRouter;

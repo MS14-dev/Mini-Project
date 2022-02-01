@@ -40,8 +40,33 @@ const findInstitutionById=(id)=>{
     })
 }
 
+const findValidityOfUserName=(userName)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select * from institutions where userName='${userName}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+const findValidityOfName=(name)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select * from institutions where name='${name}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewInstitution,
     findInstitutionByUserName,
-    findInstitutionById
+    findInstitutionById,
+    findValidityOfUserName,
+    findValidityOfName
 }

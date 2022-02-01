@@ -1,15 +1,24 @@
 const express = require('express')
+const mongoose = require('mongoose')
 const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
-const {addNewStudent,getStudentByEmail,getStudentByStudentId} = require('../dbRoutes/students')
-const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse} = require('../dbRoutes/conducts')
+const {addNewStudent,getStudentByEmail,getStudentByStudentId,findAvailabilityofNIC,findAvailabilityofEmail} = require('../dbRoutes/students')
+const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct} = require('../dbRoutes/conducts')
 const {findResultByConductId,addNewResult} = require('../dbRoutes/results')
 const {findExamsByCourseId,updateResultByConductId} = require('../dbRoutes/exams')
 
+//Block class
 const Block = require('../Block')
+//Blockchain Class
 const BlockChain = require('../BlockChain')
-const { findCourseById } = require('../dbRoutes/courses')
+//block mongodb model
+const block = require('../models/Block')
+
+// const { findCourseById } = require('../dbRoutes/courses')
+
+//import databse module
+// const block = require('../models/Block')
 
 
 const studentRoute = express.Router();
@@ -17,22 +26,33 @@ const studentRoute = express.Router();
 //signin of students
 studentRoute.post('/signin',async(req,res)=>{
 
-    if(!req.session.isLogged){
+if(!req.session.isLogged){
     let{name,nic,email,password} = req.body
     let randomStudentId = uuid();
     console.log(req.body)
-    let hashedEmail = SHA256(email).toString();console.log(hashedEmail);
+    let hashedEmail = SHA256(email).toString();
     let hashedPassword = SHA256(password).toString();
     let hashedNIC = SHA256(nic).toString();
     
-    let row = await addNewStudent(name,hashedNIC,hashedEmail,hashedPassword,randomStudentId);
-    // console.log(row[0].name)
-    req.session.isLogged = true;
-    req.session.studentId = row[0].id
-    res.send({response:true,message:'Successfully Signin',data:row[0]})
-    }else{
-        res.send({response:false,message:'Already Logged',data:null})
-    }
+    let idApproval = await findAvailabilityofNIC(hashedNIC);
+    let emailApproval = await findAvailabilityofEmail(hashedEmail);
+
+      if(idApproval.length == 0){
+          if(emailApproval.length == 0){
+            let row = await addNewStudent(name,hashedNIC,hashedEmail,hashedPassword,randomStudentId);
+            // console.log(row[0].name)
+            req.session.isLogged = true;
+            req.session.studentId = row[0].id
+            res.send({response:true,message:'Successfully Signin',data:row[0]})
+          }else{
+              res.send({response:false,message:"Email you entered is already used",data:null})
+          }
+      }else{
+          res.send({response:false,message:"NIC is already used",data:null})
+      }
+}else{
+    res.send({response:false,message:'Already Logged',data:null})
+}
 })
 
 //login of students
@@ -188,18 +208,28 @@ studentRoute.post('/result-update-exam1',async(req,res)=>{
     let {conductId,exam} = req.body
     if(req.session.isLogged){
         let data = await updateResultByConductId(conductId,exam)
-        console.log(data)
-        res.send('K');
+        if(data.affectedRows == 1){
+
+            res.send({response:true,message:'You have successfully passed the first level',data:null});
+        }
     }else{
         res.send({response:false,message:'Need to login first',data:null})
     }
 })
+
+//exam two result update and block creation for particular achievement
 studentRoute.post('/result-update-exam2',async(req,res)=>{
     let {conductId,exam} = req.body
     if(req.session.isLogged){
         let data = await updateResultByConductId(conductId,exam)
-        console.log(data)
-        res.send('K');
+        if(data.affectedRows == 1){
+            let update = await updateCompleteOfConduct(conductId)
+            if(update.affectedRows == 1){
+                res.send({response:true,message:'You have successfully passed the course',data:null});
+            }else{
+                res.send({response:false,message:'Some Server error',data:null})
+            }
+        }
     }else{
         res.send({response:false,message:'Need to login first',data:null})
     }
@@ -216,14 +246,41 @@ studentRoute.post('/result-update-exam2',async(req,res)=>{
 
 //the blockchain part
 const blockChain = new BlockChain();
-studentRoute.get('/block',(req,res)=>{
+blockChain.createMashBlock();
+studentRoute.get('/block',async(req,res)=>{
     let certificateData = uuid()
-    let d = new Date();
-    date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+    let date = new Date()
 
-    let block = new Block(blockChain.getLatestBlock().index + 1,date,`certificate_${certificateData}`);
-    blockChain.addBlock(block)
-    res.send(blockChain.isChainValid());
+    //create the new block
+    let newBlock = new Block( 
+        (blockChain.getLatestBlock().index + 1), 
+        date.toUTCString(), 
+        `certificate_${certificateData}`,
+        blockChain.getLatestBlock().hash);
+  
+    //check the chain before add the block
+    if(blockChain.isChainValid()){
+        console.log("PRE-HASH: ",newBlock.preHash)
+        //add the new block to the mongodb
+        block.create({index:newBlock.index,
+            date:newBlock.date,
+            data:newBlock.data,
+            hash:newBlock.hash,
+            preHash:newBlock.preHash})
+        
+        //add the new block to the chain
+        blockChain.addBlock(newBlock)
+        //check the chain after add to the block
+        if(blockChain.isChainValid()){
+            res.send({response:true,message:'Success'})
+        }
+        // console.log(blockChain)
+    }
+    //console.log(blockChain)
+    // // res.send(blockChain.isChainValid());
+    // res.send({response:true,message:"Hiiii from block-test",data:block})
+
+
 })
 
 module.exports = studentRoute;

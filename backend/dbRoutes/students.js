@@ -40,8 +40,34 @@ const getStudentByStudentId=(id)=>{
     })
 }
 
+const findAvailabilityofNIC=(nic)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from students where nic = '${nic}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+const findAvailabilityofEmail = (email)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from students where email = '${email}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewStudent,
     getStudentByEmail,
-    getStudentByStudentId
+    getStudentByStudentId,
+    findAvailabilityofNIC,
+    findAvailabilityofEmail
 }
