@@ -32,7 +32,7 @@ const findCourseById=(id)=>{
 
 const findAllCourses=()=>{
     return new Promise((resolve,reject)=>{
-        database.query(`select*from courses`,(err,row)=>{
+        database.query(`select*from courses limit 4`,(err,row)=>{
             if(err){
                 reject(err)
             }else{
@@ -67,11 +67,24 @@ const findCourseByIdForCertificate=(id)=>{
     })
 }
 
+const findAllCoursesByInstitutionId=(institutionId)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from courses where institution='${institutionId}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewCourse,
     findCourseById,
     findCourseById,
     findAllCourses,
     findCourseByUserInput,
-    findCourseByIdForCertificate
+    findCourseByIdForCertificate,
+    findAllCoursesByInstitutionId
 };

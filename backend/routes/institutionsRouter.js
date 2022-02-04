@@ -23,7 +23,7 @@ institutionRouter.use(fileUpload());
 
 institutionRouter.post('/signin',async(req,res)=>{
     if(!req.session.isLogged){
-    let {name,userName,password} = req.body;
+    let {name,userName,password,description} = req.body;
     let image = req.files.image;
     console.log(image)
     let randomInsId = uuid();
@@ -45,7 +45,7 @@ institutionRouter.post('/signin',async(req,res)=>{
                         res.send({response:false,message:'Failed to register',data:null})
                     }else{
                         let imagePath = `http://localhost:8000/public/images/institutions/${newImageName}`
-                        let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword,imagePath);
+                        let data = await addNewInstitution(randomInsId,name,hashedUserName,hashedPassword,imagePath,description);
                         req.session.isLogged = true;
                         req.session.institutionId = data[0].id;
                         res.send({response:true,message:'Successfully Registered',data:data[0]});

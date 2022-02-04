@@ -1,3 +1,4 @@
+const res = require('express/lib/response');
 const database = require('../database');
 
 // login purposes
@@ -13,10 +14,10 @@ const findInstitutionByUserName=(hashedUserName)=>{
     })
 }
 
-const addNewInstitution =(id,name,userName,password,image)=>{
+const addNewInstitution =(id,name,userName,password,image,description)=>{
     return new Promise((resolve,reject)=>{
-        database.query(`insert into institutions (id,name,userName,password,image) values('${id}','${name}',
-        '${userName}','${password}','${image}')`,(err,row)=>{
+        database.query(`insert into institutions (id,name,userName,password,image,description) values(?,?,?,?,?,?)`,
+        [id,name,userName,password,image,description],(err,row)=>{
             if(err){
                 reject(err)
             }else{
@@ -63,10 +64,23 @@ const findValidityOfName=(name)=>{
     })
 }
 
+const findAllInstitutions =()=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select name,image,id from institutions`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewInstitution,
     findInstitutionByUserName,
     findInstitutionById,
     findValidityOfUserName,
-    findValidityOfName
+    findValidityOfName,
+    findAllInstitutions
 }
