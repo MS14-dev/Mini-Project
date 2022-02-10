@@ -1,6 +1,7 @@
 const express = require('express');
 const {v4:uuid} = require('uuid')
 const {SHA256} = require('crypto-js')
+const crypto = require('crypto')
 const fileUpload = require('express-fileupload')
 
 const {addNewInstitution,findInstitutionByUserName,findInstitutionById,findValidityOfName,findValidityOfUserName} = require('../dbRoutes/institutions');
@@ -9,6 +10,7 @@ const {addNewExam} = require('../dbRoutes/exams');
 const { response } = require('express');
 const  {findAllConductsByInstitution,findConductById,updateCertificateId} = require('../dbRoutes/conducts')
 const {getStudentByStudentId} = require('../dbRoutes/students')
+const {addNewCertificate} = require('../dbRoutes/certificates')
 
 
 //Block class
@@ -235,9 +237,22 @@ if(req.session.isLogged){
                             blockChain.addBlock(newBlock)
                             //check the chain after add to the block
                             if(blockChain.isChainValid()){
-                                let data = await updateCertificateId(conductId,certificateData)
+
+                                let prime_length = 60;
+                                let DiffHell = crypto.createDiffieHellman(prime_length);
+                                DiffHell.generateKeys('base64');
+                                let studentKey = DiffHell.getPublicKey('base64');
+                                let institutionKey = DiffHell.getPrivateKey('base64');
+                                let hash = SHA256(`${studentKey}${institutionKey}`).toString()
+
+                                let data = await updateCertificateId(conductId,studentKey)
                                 if(data.affectedRows){
-                                res.send({response:true,message:'Success'})
+                                    let afterAddCerificate = await addNewCertificate(institutionKey,hash,studentData[0].nic,certificateData)
+                                    if(afterAddCerificate.affectedRows){
+                                       res.send({response:true,message:'Success'})
+                                    }else{
+                                        res.send({response:false,message:'Some server error'})
+                                    }
                                 }else{
                                     res.send({response:false,message:'Some server error'})
                                 }

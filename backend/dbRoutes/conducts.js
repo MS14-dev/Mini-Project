@@ -37,7 +37,7 @@ const findConductByStudentId = async(id)=>{
         //         resolve(row)
         //     }
         // })
-        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId
+        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId, conducts.notification
                       FROM conducts inner join courses on conducts.course = courses.id where conducts.student = '${id}'`,
         (err,row)=>{
             if(err){
@@ -102,6 +102,18 @@ const updateCertificateId=(conductId,certificateId)=>{
     })
 }
 
+const updateConductNotification=(conductId)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`update conducts set notification = 1 where id = '${conductId}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewConduct,
     findConductById,
@@ -109,5 +121,6 @@ module.exports = {
     findInvolvementOfStudentToCourse,
     findAllConductsByInstitution,
     updateCompleteOfConduct,
-    updateCertificateId
+    updateCertificateId,
+    updateConductNotification
 }

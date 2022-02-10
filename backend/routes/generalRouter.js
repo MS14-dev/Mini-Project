@@ -1,9 +1,16 @@
 const express = require('express')
+const crypto = require('crypto')
+const {SHA256} = require('crypto-js')
+const Assert = require('assert')
+const ShortId = require('shortid')
 
 const {findCourseById,findAllCourses,findCourseByUserInput,findAllCoursesByInstitutionId} = require('../dbRoutes/courses')
 const {findInstitutionById,findAllInstitutions} = require('../dbRoutes/institutions')
 const {findExamsByCourseId} = require('../dbRoutes/exams');
+const {addNewCertificate} = require('../dbRoutes/certificates')
+
 const { response } = require('express');
+const { isCryptoKey } = require('util/types')
 
 const generalRouter = express.Router();
 
@@ -82,5 +89,45 @@ generalRouter.post('/all-courses-by-institution',async (req,res)=>{
     }
 })
 
+// the code below is to only test the private and public key generating
+generalRouter.post('/test',async(req,res)=>{
+
+
+
+// crypto-random-string - npm
+// let id = ShortId.generate();
+// let valid = ShortId.isValid(id)
+// res.send({id,valid})
+
+
+
+let prime_length = 60;
+let DiffHell = crypto.createDiffieHellman(prime_length);
+
+DiffHell.generateKeys('base64');
+let studentKey = DiffHell.getPublicKey('base64');
+let institutionKey = DiffHell.getPrivateKey('base64');
+
+
+let hash = SHA256(`${studentKey}${institutionKey}`).toString()
+
+})
+
 
 module.exports = generalRouter;
+
+
+// const alice = Crypto.createDiffieHellman(50);
+// const aliceKey = alice.generateKeys();
+
+// // Generate Bob's keys...
+// const bob = Crypto.createDiffieHellman(alice.getPrime(), alice.getGenerator());
+// const bobKey = bob.generateKeys();
+
+// // Exchange and generate the secret...
+// const aliceSecret = alice.computeSecret(bobKey);
+// const bobSecret = bob.computeSecret(aliceKey);
+// console.log({k:aliceSecret.toString('hex'),f:bobSecret.toString('hex')})
+// // OK
+// console.log(aliceSecret.toString('hex') == bobSecret.toString('hex'))
+// res.send("hey")

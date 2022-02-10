@@ -4,7 +4,7 @@ const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
 const {addNewStudent,getStudentByEmail,getStudentByStudentId,findAvailabilityofNIC,findAvailabilityofEmail} = require('../dbRoutes/students')
-const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct} = require('../dbRoutes/conducts')
+const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct,updateConductNotification} = require('../dbRoutes/conducts')
 const {findResultByConductId,addNewResult} = require('../dbRoutes/results')
 const {findExamsByCourseId,updateResultByConductId} = require('../dbRoutes/exams')
 
@@ -232,6 +232,20 @@ studentRoute.post('/result-update-exam2',async(req,res)=>{
         }
     }else{
         res.send({response:false,message:'Need to login first',data:null})
+    }
+})
+
+studentRoute.post('/update-notification',async (req,res)=>{
+    let {conductId} = req.body;
+    if(req.session.isLogged){
+        let data = await updateConductNotification(conductId);
+        if(data.affectedRows != 0){
+            res.send({response:true,message:"Success"})
+        }else{
+            res.send({response:false,message:'Failed'})
+        }
+    }else{
+        res.send({response:false,message:"Need to login first",data:null})
     }
 })
 // studentRoute.get('/exam',(req,res)=>{
