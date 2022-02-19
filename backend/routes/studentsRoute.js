@@ -4,9 +4,10 @@ const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
 const {addNewStudent,getStudentByEmail,getStudentByStudentId,findAvailabilityofNIC,findAvailabilityofEmail} = require('../dbRoutes/students')
-const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct,updateConductNotification} = require('../dbRoutes/conducts')
+const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct,updateConductNotification,getUnreadNotificationsByStudentId} = require('../dbRoutes/conducts')
 const {findResultByConductId,addNewResult} = require('../dbRoutes/results')
 const {findExamsByCourseId,updateResultByConductId} = require('../dbRoutes/exams')
+const {findCourseById} = require('../dbRoutes/courses')
 
 //Block class
 const Block = require('../Block')
@@ -248,6 +249,47 @@ studentRoute.post('/update-notification',async (req,res)=>{
         res.send({response:false,message:"Need to login first",data:null})
     }
 })
+//get all unreaded message count for particular student
+studentRoute.get('/notifications',async(req,res)=>{
+    if(req.session.isLogged){
+        let data = await getUnreadNotificationsByStudentId(req.session.studentId);
+        if(data.length != 0){
+            res.send({response:true,message:"Have new notifactions",data:data.length})
+        }else{
+            res.send({response:true,message:"Have new notifactions",data:0})
+        }
+    }else{
+        res.send({response:false,message:"Need to login first",data:null})
+    }
+})
+
+
+//get studentside certificate for achievement
+studentRoute.post('/certificate/:conductId',async(req,res)=>{
+
+if(req.session.isLogged){
+    let conductId = req.params.conductId
+
+    let conductData = await findConductById(conductId)
+    if(conductData.length != 0){
+        let courseData = await findCourseById(conductData[0].course)
+        if(courseData.length != 0){
+            res.send({response:true,message:"Success",data:{
+                courseName:courseData[0].name,
+                image:institutionImg,
+                key:conductData[0].certificateId
+            }})
+        }else{
+            res.send({response:false,message:"Server Error"})
+        }
+    }else{
+        res.send({response:false,message:"Server Error"})
+    }
+}else{
+    res.send({response:false,message:"Need to login first",data:null})
+}
+})
+
 // studentRoute.get('/exam',(req,res)=>{
 //     sqlDB.query('select * from exams',(err,row)=>{
 //         if(err){

@@ -114,6 +114,21 @@ const updateConductNotification=(conductId)=>{
     })
 }
 
+//for student notification purpose:
+const getUnreadNotificationsByStudentId=(studentId)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select*from conducts where student=? AND notification = 0`,[studentId],(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+
+
 module.exports = {
     addNewConduct,
     findConductById,
@@ -122,5 +137,6 @@ module.exports = {
     findAllConductsByInstitution,
     updateCompleteOfConduct,
     updateCertificateId,
-    updateConductNotification
+    updateConductNotification,
+    getUnreadNotificationsByStudentId
 }

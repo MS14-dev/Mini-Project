@@ -10,7 +10,7 @@ const {addNewExam} = require('../dbRoutes/exams');
 const { response } = require('express');
 const  {findAllConductsByInstitution,findConductById,updateCertificateId} = require('../dbRoutes/conducts')
 const {getStudentByStudentId} = require('../dbRoutes/students')
-const {addNewCertificate} = require('../dbRoutes/certificates')
+const {addNewCertificate,getCerificatesByNIC} = require('../dbRoutes/certificates')
 
 
 //Block class
@@ -195,8 +195,8 @@ institutionRouter.post('/release-certificate',async(req,res)=>{
     let courseData = await findCourseByIdForCertificate(conductData[0].course)
     let institutionData = await findInstitutionById(courseData[0].institution)
     let studentData = await getStudentByStudentId(conductData[0].student)
-    console.log("InstitutionData:==",institutionData)
-    console.log("courseData:==",courseData)
+    // console.log("InstitutionData:==",institutionData)
+    // console.log("courseData:==",courseData)
 if(req.session.isLogged){
     if(conductData[0].certificateId == '0' && conductData[0].complete == 1){
                         let certificateData = uuid()//generate certifcate ID
@@ -258,6 +258,8 @@ if(req.session.isLogged){
                                 }
                             }
                             // console.log(blockChain)
+                        }else{
+                            console.log("Problem number 0ne")
                         }
     }
     else{
@@ -267,6 +269,54 @@ if(req.session.isLogged){
 else{
     res.send({response:false,message:"Please Login First",data:null});
 }
+
+})
+
+//certifications verification.....
+institutionRouter.post('/certificate-validation',async (req,res)=>{
+
+if(req.session.isLogged){
+    let {nic,studentKey} = req.body;
+    let hashedNIC = SHA256(nic).toString(); 
+    let certificateID = '';
+
+    let allCertificates = await getCerificatesByNIC(hashedNIC);
+
+    if(allCertificates.length != 0){
+        allCertificates.map((certificate)=>{
+            if(SHA256(`${studentKey}${certificate.institution}`).toString() == certificate.hash){
+                certificateID = certificate.certificate;
+            }
+        })
+        if(certificateID != ''){
+            let blockDetails = await block.find({})
+            let certificateBlock
+            blockDetails.map((detail)=>{
+                if(detail.data.certificateId = certificateID){
+                    certificateBlock = detail
+                }
+            })
+            if(certificateBlock){
+                if(certificateBlock.data.institutionData.id == req.session.institutionId){
+                    console.log(certificateBlock.data.institutionData.id)
+                    res.send({response:true,message:'Verified',data:certificateBlock})
+                }else{
+                    res.send({response:false,message:'The key you have entered is invalid',data:null})
+                }
+            }else{
+                res.send({response:true,message:"Certificate have but can not retrieve from mongo",data:null})
+            }
+        }else{
+            console.log('Fake key')
+            res.send({response:false,message:'The key you have entered is invalid',data:null})
+        }
+    }else{
+        console.log('No matched NIC')
+        res.send({response:false,message:'No matched certificates for the NIC',data:null})
+    }
+}else{
+    res.send({response:false,message:"Need to login First"})
+}   
 
 })
 
