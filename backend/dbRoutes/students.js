@@ -64,10 +64,24 @@ const findAvailabilityofEmail = (email)=>{
     })
 }
 
+//for admin purposes only
+const getAllStudents=()=>{
+    return new Promise((resolve,reject)=>{
+        database.query('select id,name from students',(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
 module.exports = {
     addNewStudent,
     getStudentByEmail,
     getStudentByStudentId,
     findAvailabilityofNIC,
-    findAvailabilityofEmail
+    findAvailabilityofEmail,
+    getAllStudents,
 }

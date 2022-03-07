@@ -32,7 +32,7 @@ const findCourseById=(id)=>{
 
 const findAllCourses=()=>{
     return new Promise((resolve,reject)=>{
-        database.query(`select*from courses limit 4`,(err,row)=>{
+        database.query(`select*from courses`,(err,row)=>{
             if(err){
                 reject(err)
             }else{

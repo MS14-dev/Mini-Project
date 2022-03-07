@@ -270,13 +270,16 @@ studentRoute.post('/certificate/:conductId',async(req,res)=>{
 if(req.session.isLogged){
     let conductId = req.params.conductId
 
+    let studentData = await getStudentByStudentId(req.session.studentId)
+
     let conductData = await findConductById(conductId)
     if(conductData.length != 0){
         let courseData = await findCourseById(conductData[0].course)
         if(courseData.length != 0){
             res.send({response:true,message:"Success",data:{
+                studentName:studentData[0].name,
                 courseName:courseData[0].name,
-                image:institutionImg,
+                image:courseData[0].institutionImg,
                 key:conductData[0].certificateId
             }})
         }else{

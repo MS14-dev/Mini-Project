@@ -5,7 +5,6 @@ const blockSchema=new Schema({
     index:{
         type:Number,
         min:1,
-        max:5,
         required:true
     },
     date:{

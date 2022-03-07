@@ -117,7 +117,7 @@ const updateConductNotification=(conductId)=>{
 //for student notification purpose:
 const getUnreadNotificationsByStudentId=(studentId)=>{
     return new Promise((resolve,reject)=>{
-        database.query(`select*from conducts where student=? AND notification = 0`,[studentId],(err,row)=>{
+        database.query(`select*from conducts where student=? AND notification = 0 AND (NOT certificateId = '0')`,[studentId],(err,row)=>{
             if(err){
                 reject(err)
             }else{
@@ -127,6 +127,46 @@ const getUnreadNotificationsByStudentId=(studentId)=>{
     })
 }
 
+//get students count for separate courses
+const studentCountsForCourses=()=>{
+    return new Promise((resolve,reject)=>{
+        database.query('select COUNT (conducts.course) as studentCount,courses.name from conducts join courses on courses.id = conducts.course group by conducts.course',(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+//get students count separately for institutions
+const studentCountForInstituions=()=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select COUNT(conducts.course) as studentCount,institutions.name from institutions join courses
+        on institutions.id = courses.institution 
+        join conducts on conducts.course = courses.id group by institutions.name`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+
+//get complete and pending conducts
+const getAllCompletedConducts = ()=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select * from conducts where complete = 1`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
 
 
 module.exports = {
@@ -138,5 +178,8 @@ module.exports = {
     updateCompleteOfConduct,
     updateCertificateId,
     updateConductNotification,
-    getUnreadNotificationsByStudentId
+    getUnreadNotificationsByStudentId,
+    studentCountsForCourses,
+    studentCountForInstituions,
+    getAllCompletedConducts
 }

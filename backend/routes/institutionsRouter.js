@@ -296,6 +296,7 @@ if(req.session.isLogged){
                     certificateBlock = detail
                 }
             })
+            console.log(blockDetails)
             if(certificateBlock){
                 if(certificateBlock.data.institutionData.id == req.session.institutionId){
                     console.log(certificateBlock.data.institutionData.id)

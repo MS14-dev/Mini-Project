@@ -22,6 +22,8 @@ connect.then(function(db){
 const studentRouter = require('./routes/studentsRoute')
 const institutionRouter = require('./routes/institutionsRouter')
 const generalRouter = require('./routes/generalRouter')
+const adminRouter = require('./routes/adminRouter')
+
 const req = require('express/lib/request')
 
 const app = express();
@@ -48,6 +50,7 @@ app.use(cors({
 // app.use('/students',studentRouter);
 app.use('/student',studentRouter);
 app.use('/institution',institutionRouter);
+app.use('/admin',adminRouter);
 app.use('/general',generalRouter);
 
 app.use('/public/images',express.static(path.join(__dirname, '/public/images')));
