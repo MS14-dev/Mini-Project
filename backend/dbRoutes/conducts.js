@@ -37,12 +37,13 @@ const findConductByStudentId = async(id)=>{
         //         resolve(row)
         //     }
         // })
-        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId, conducts.notification
+        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId, conducts.notification, conducts.complete
                       FROM conducts inner join courses on conducts.course = courses.id where conducts.student = '${id}'`,
         (err,row)=>{
             if(err){
                 reject(err)
             }else{
+                console.log(row)
                 resolve(row)
             }
         })
@@ -167,6 +168,30 @@ const getAllCompletedConducts = ()=>{
         })
     })
 }
+//get all conducts for admin purposes
+const getAllConducts=()=>{
+    return new Promise((resolve,reject)=>{
+        database.query('select * from conducts',(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
+//get all conducts of particular course //admin institution course purposes
+const getConductsForParticularCourse=(courseId)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select * from conducts where course = '${courseId}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
 
 
 module.exports = {
@@ -181,5 +206,7 @@ module.exports = {
     getUnreadNotificationsByStudentId,
     studentCountsForCourses,
     studentCountForInstituions,
-    getAllCompletedConducts
+    getAllCompletedConducts,
+    getAllConducts,
+    getConductsForParticularCourse
 }
