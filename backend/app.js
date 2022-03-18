@@ -17,6 +17,8 @@ connect.then(function(db){
   console.log(err);
 })
 
+//import database (MySQL) routes
+const {addMessage,getMessages} = require('./dbRoutes/chat')
 
 // const studentRouter = require('./routes/studentRouter');
 const studentRouter = require('./routes/studentsRoute')
@@ -65,19 +67,22 @@ var io = new Server(server,{
   });
 
 io.on('connection',(socket)=>{
-    socket.on('backend-load',(x)=>{
+    socket.on('send-message-to-backend',async({course,sender,receiver,message})=>{
         console.log(socket.id)
-        io.sockets.emit('frontent-load','hello from backend, What can I do for you!!!')
+        console.log(message)
+        
+        let latestMessageSet = await addMessage(course,sender,receiver,message)
+        
+        //send message to the frontend 
+        socket.broadcast.emit('send-message-to-frontend',latestMessageSet)
     })
-    socket.on('bot-question',(q)=>{
-        let questionArray = q.split(' ');
-        let questionArrayLowercase = questionArray.map((text)=>{
-            return text.toLowerCase()
-        })
-        console.log(questionArrayLowercase)
-        socket.emit('bot-answer',"Hello Answer from backend!!")
+    socket.on('get-all-chat-from-backend',async ({course,sender,receiver})=>{
+        let latestMessageSet = await getMessages(course,sender,receiver)
+        socket.emit('send-message-to-frontend',latestMessageSet)
     })
 })
+
+
 
 server.listen(8000,(err)=>{
     if(err){
@@ -85,3 +90,5 @@ server.listen(8000,(err)=>{
     }
     console.log("server runs")
 })
+
+module.exports = {io}

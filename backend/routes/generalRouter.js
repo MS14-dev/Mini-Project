@@ -8,6 +8,7 @@ const {findCourseById,findAllCourses,findCourseByUserInput,findAllCoursesByInsti
 const {findInstitutionById,findAllInstitutions} = require('../dbRoutes/institutions')
 const {findExamsByCourseId} = require('../dbRoutes/exams');
 const {addNewCertificate} = require('../dbRoutes/certificates')
+const {getAllStudentsForParticularCourse} = require('../dbRoutes/conducts')
 
 const { response } = require('express');
 const { isCryptoKey } = require('util/types')
@@ -112,6 +113,23 @@ let institutionKey = DiffHell.getPrivateKey('base64');
 let hash = SHA256(`${studentKey}${institutionKey}`).toString()
 
 })
+
+//get all student details for particular course
+generalRouter.get('/all-students-for-course/:id',async (req,res)=>{
+    let courseId = req.params.id
+    if(req.session.isLogged){
+        let allStudents = await getAllStudentsForParticularCourse(courseId)
+        console.log('All Students for Course',allStudents)
+        if(allStudents.length != 0){
+            res.send({response:true,message:"Course have involvements",data:allStudents,userId:req.session.studentId})
+        }else{
+            res.send({response:true,message:"Course have no involvements",data:allStudents,userId:req.session.studentId})
+        }
+    }else{
+        res.send({response:false,message:"Need to login first",data:null})
+    }
+})
+
 
 
 module.exports = generalRouter;

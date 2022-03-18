@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const {v4:uuid,validate} = require('uuid')
 const {SHA256} = require('crypto-js')
 
+// const {io} = require('../app')
+
 const {addNewStudent,getStudentByEmail,getStudentByStudentId,findAvailabilityofNIC,findAvailabilityofEmail} = require('../dbRoutes/students')
 const {addNewConduct,findConductByStudentId,findConductById,findInvolvementOfStudentToCourse,updateCompleteOfConduct,updateConductNotification,getUnreadNotificationsByStudentId} = require('../dbRoutes/conducts')
 const {findResultByConductId,addNewResult} = require('../dbRoutes/results')
@@ -125,6 +127,7 @@ studentRoute.post('/involve-new-course',async(req,res)=>{
     if(req.session.isLogged){
 
         let involveData = await findInvolvementOfStudentToCourse(student,course)
+        console.log("Involve Data : ",involveData)
       if(involveData.length == 0){
         let randomConductId = uuid();
 
@@ -280,7 +283,8 @@ if(req.session.isLogged){
                 studentName:studentData[0].name,
                 courseName:courseData[0].name,
                 image:courseData[0].institutionImg,
-                key:conductData[0].certificateId
+                key:conductData[0].certificateId,
+                institution:courseData[0].institution
             }})
         }else{
             res.send({response:false,message:"Server Error"})
@@ -341,6 +345,10 @@ studentRoute.get('/block',async(req,res)=>{
 
 
 })
+
+//chat option test
+
+
 
 module.exports = studentRoute;
 

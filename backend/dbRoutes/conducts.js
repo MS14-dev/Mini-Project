@@ -37,7 +37,7 @@ const findConductByStudentId = async(id)=>{
         //         resolve(row)
         //     }
         // })
-        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId, conducts.notification, conducts.complete
+        database.query(`SELECT courses.name,conducts.id as conductId,courses.image as image, conducts.certificateId, conducts.notification, conducts.complete, conducts.course as courseId
                       FROM conducts inner join courses on conducts.course = courses.id where conducts.student = '${id}'`,
         (err,row)=>{
             if(err){
@@ -193,6 +193,19 @@ const getConductsForParticularCourse=(courseId)=>{
     })
 }
 
+//get all students for particular course for chat :)
+const getAllStudentsForParticularCourse=(courseId)=>{
+    return new Promise((resolve,reject)=>{
+        database.query(`select students.name, students.id from conducts inner join students on 
+        conducts.student = students.id where conducts.course = '${courseId}'`,(err,row)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(row)
+            }
+        })
+    })
+}
 
 module.exports = {
     addNewConduct,
@@ -208,5 +221,6 @@ module.exports = {
     studentCountForInstituions,
     getAllCompletedConducts,
     getAllConducts,
-    getConductsForParticularCourse
+    getConductsForParticularCourse,
+    getAllStudentsForParticularCourse
 }
