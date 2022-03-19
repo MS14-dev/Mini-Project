@@ -74,6 +74,8 @@ io.on('connection',(socket)=>{
         let latestMessageSet = await addMessage(course,sender,receiver,message)
         
         //send message to the frontend 
+        // io.sockets.once().emit('send-message-to-frontend',latestMessageSet)
+        // socket.broadcast.emit('send-message-to-frontend',latestMessageSet)
         socket.broadcast.emit('send-message-to-frontend',latestMessageSet)
     })
     socket.on('get-all-chat-from-backend',async ({course,sender,receiver})=>{
