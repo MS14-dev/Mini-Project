@@ -281,6 +281,7 @@ if(req.session.isLogged){
     let certificateID = '';
 
     let allCertificates = await getCerificatesByNIC(hashedNIC);
+    console.log("All Certificates By NIC:-",allCertificates)
 
     if(allCertificates.length != 0){
         allCertificates.map((certificate)=>{
@@ -288,11 +289,12 @@ if(req.session.isLogged){
                 certificateID = certificate.certificate;
             }
         })
+        console.log("Original Certificate ID: ", certificateID)
         if(certificateID != ''){
             let blockDetails = await block.find({})
             let certificateBlock
             blockDetails.map((detail)=>{
-                if(detail.data.certificateId = certificateID){
+                if(detail.data.certificateId == certificateID){
                     certificateBlock = detail
                 }
             })

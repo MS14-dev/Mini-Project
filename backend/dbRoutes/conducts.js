@@ -67,8 +67,8 @@ const findInvolvementOfStudentToCourse=(student,course)=>{
 // find all the conducts in particular institution;
 const findAllConductsByInstitution=(institutionId)=>{
     return new Promise((resolve,reject)=>{
-        database.query(`SELECT conducts.id,conducts.certificateId,conducts.complete from conducts join courses on courses.id = conducts.course 
-        join institutions on institutions.id = courses.institution where institutions.id ='${institutionId}'`,(err,row)=>{
+        database.query(`SELECT conducts.id,conducts.certificateId,conducts.complete, students.name as studentName, courses.name as courseName, results.exam1, results.exam2 from conducts join courses on courses.id = conducts.course 
+        join institutions on institutions.id = courses.institution join students on conducts.student = students.id join results on results.conduct = conducts.id where institutions.id ='${institutionId}'`,(err,row)=>{
             if(err){
                 reject(err)
             }else{
